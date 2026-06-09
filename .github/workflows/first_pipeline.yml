@@ -1,0 +1,24 @@
+name: CI/CD Engine Test
+
+# 1. The Event: What triggers this?
+on:
+  push:
+    branches:
+      - main
+
+# 2. The Jobs: What are we doing?
+jobs:
+  system-check:
+    # 3. The Runner: Where does this run?
+    runs-on: ubuntu-latest
+    
+    # 4. The Steps: The exact commands to execute
+    steps:
+      - name: Announce the system
+        run: echo "Hello from the GitHub Actions Runner!"
+        
+      - name: Check OS details
+        run: cat /etc/os-release
+        
+      - name: Check Python version
+        run: python3 --version
