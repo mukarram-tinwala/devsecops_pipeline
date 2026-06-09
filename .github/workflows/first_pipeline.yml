@@ -1,24 +1,31 @@
-name: CI/CD Engine Test
+name: CI Testing Pipeline
 
-# 1. The Event: What triggers this?
 on:
   push:
     branches:
       - main
 
-# 2. The Jobs: What are we doing?
 jobs:
-  system-check:
-    # 3. The Runner: Where does this run?
+  unit-tests:
     runs-on: ubuntu-latest
     
-    # 4. The Steps: The exact commands to execute
     steps:
-      - name: Announce the system
-        run: echo "Hello from the GitHub Actions Runner!"
+      # Step 1: Bring the code onto the runner
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         
-      - name: Check OS details
-        run: cat /etc/os-release
-        
-      - name: Check Python version
-        run: python3 --version
+      # Step 2: Set up the exact Python environment
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          
+      # Step 3: Install our testing framework
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          
+      # Step 4: Execute the tests!
+      - name: Run Pytest
+        run: pytest
