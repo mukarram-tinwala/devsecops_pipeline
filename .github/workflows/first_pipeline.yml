@@ -1,42 +1,7 @@
-name: CI/CD Pipeline
-
-# 1. Trigger on pushes AND pull requests to main
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  # ----------------------------------------
-  # Job 1: The Gatekeeper (Tests)
-  # ----------------------------------------
-  unit-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        
-      - name: Setup Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest
-          
-      - name: Run Pytest
-        run: pytest
-
-  # ----------------------------------------
-  # Job 2: The Factory (Docker Build)
+# ----------------------------------------
+  # Job 2: The Factory & The Scanner
   # ----------------------------------------
   build-image:
-    # CRITICAL: This tells GitHub to wait for the tests to pass!
     needs: unit-tests
     runs-on: ubuntu-latest
     
@@ -44,9 +9,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         
+      # Prove we can securely access the Vault without printing the secret
+      - name: Access Encrypted Secret
+        env:
+          API_KEY: ${{ secrets.PRODUCTION_API_KEY }}
+        run: |
+          echo "The API key length is: ${#API_KEY}"
+          echo "We securely injected the key without exposing it!"
+        
       - name: Build Docker Image
-        # This uses the multi-stage Dockerfile you wrote in Week 2!
         run: docker build -t my-production-app:latest .
         
-      - name: Verify Image Exists
-        run: docker images
+      # NEW: The Security Scanner
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'my-production-app:latest'
+          format: 'table'
+          exit-code: '1' # Fails the pipeline if CRITICAL vulnerabilities are found
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
