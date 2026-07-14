@@ -1,5 +1,5 @@
-# CRITICAL VULNERABILITY: Using an ancient, unsupported base image
-FROM python:3.6-slim 
+# Swapped to Buster: Modern enough to build, old enough to be highly vulnerable
+FROM python:3.9-slim-buster 
 
 # CRITICAL VULNERABILITY: Running as root
 USER root
