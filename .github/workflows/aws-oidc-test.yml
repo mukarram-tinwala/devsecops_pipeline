@@ -1,0 +1,29 @@
+name: AWS OIDC Authentication Test
+
+on:
+  push:
+    branches:
+      - main
+
+# CRITICAL: This permissions block is required to request the OIDC JWT token
+permissions:
+  id-token: write   
+  contents: read    
+
+jobs:
+  Deploy_To_AWS:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::060151520276:role/GitHubActions_Deploy_Role
+          aws-region: us-east-1
+
+      - name: Verify AWS Identity (Proof of Breach)
+        run: |
+          echo "Testing AWS Authentication..."
+          aws sts get-caller-identity
