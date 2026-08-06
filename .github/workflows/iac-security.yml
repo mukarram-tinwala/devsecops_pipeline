@@ -1,0 +1,21 @@
+name: Infrastructure Security Audit (Checkov)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  Checkov_Scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Run Checkov IaC Scanner
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: . # Scans the entire repository for Terraform files
+          framework: terraform
+          soft_fail: false # CRITICAL: This ensures the pipeline FAILS if a vulnerability is found
