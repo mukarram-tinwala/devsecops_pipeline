@@ -1,2 +1,2 @@
-urllib3==2.7.5
+urllib3==2.8.0
 certifi==2024.7.4
